@@ -1,45 +1,68 @@
 from django.shortcuts import render , redirect
-from django.urls import path , include
+from django.forms import inlineformset_factory
 from .models import (
     Product,
     Customer,
     Order,
 )
 from .forms import OrderForm
+
 def home(request):
-    order = Order.objects.all()
+    orders = Order.objects.all()
     customers = Customer.objects.all()
-    total_customer = Customer.objects.count()
-    total_order = Order.objects.count()
-    delivered = order.filter('Delivered').count()
-    pending = order.filter('Pending').count()
+    total_orders = Order.objects.count()
+    delivered = orders.filter(status='Delivered').count()
+    pending = orders.filter(status='Pending').count()
 
-    context = {'customers' : customers,
-               'order':order,
-               'total_customer' : total_customer,
-               'delivered':delivered,
-               'pending':pending
+    context = {'customers': customers,
+               'orders': orders,
+               'delivered': delivered,
+               'pending': pending,
+               'total_orders': total_orders
                }
-    return render(request,'accounts/dashboard.html')
+    return render(request, 'accounts/dashboard.html', context)
 
 
-def Customers(request,pk):
+def Customers(request, pk):
     customer = Customer.objects.get(id=pk)
-    orders =customer.order_set.all()
-    orders_count = orders.count()
-    context = {'customer':customer , 'orders':orders, 'orders_count':orders_count}
-    return render(request,'accounts/customer.html',{'context':context})
+    orders = customer.order_set.all()
+    order_count = orders.count()
+    context = {'customer':customer, 'orders': orders, 'order_count': order_count }
+    return render(request,'accounts/customer.html', context)
 
 def Prodects(request):
     products = Product.objects.all()
-    return render(request,'accounts/products.html',{'products' : products})
-def createOrder(request):
-    form = OrderForm(request.POST)
+
+    return render(request,'accounts/products.html' , {'products': products})
+
+def createOrder(request ,pk):
+    OrderFormSet = inlineformset_factory(Customer , Order , fields=('product','status'))
+    customer = Customer.objects.get(id= pk)
+    #form = OrderForm(initial={'customer':customer})
+    formset = OrderFormSet(request.POST ,instance= customer)
     if request.method == 'POST':
-        form = OrderForm(request.POST)
+        formset = OrderForm(request.POST)
+        if formset.is_valid():
+            formset.save()
+            return redirect('/')
+
+    context ={'formset' : formset}
+    return render(request,'accounts/order_form.html',context)
+
+def updateOrder(request,pk):
+    order = Order.objects.get(id=pk)
+    form = OrderForm(instance=order)
+    if request.method == 'POST':
+        form = OrderForm(request.POST , instance=order)
         if form.is_valid():
             form.save()
             return redirect('/')
-
-    context ={'form' : form}
-    return render(request,'accounts/order_form.html',{'context':context})
+    context = {'form':form}
+    return render(request, 'accounts/order_form.html',context)
+def deleteOrder(request , pk):
+    order = Order.objects.get(id=pk)
+    if request.method == "POST":
+        order.delete()
+        return redirect('/')
+    context = {'item':order}
+    return render(request , 'accounts/delete.html',context)

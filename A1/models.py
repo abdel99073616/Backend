@@ -19,8 +19,8 @@ class Tag(models.Model):
 
 class Product(models.Model):
     CATEGORY =(
-        ('Indoor' , 'Indoor'),
-        ('Out Door' , 'Out Door'),
+        ('Indoor', 'Indoor'),
+        ('Out Door', 'Out Door'),
     )
     name = models.CharField(max_length=200 , null=True)
     price = models.FloatField(null=True)
@@ -34,8 +34,8 @@ class Product(models.Model):
 
 class Order(models.Model):
     STATUS = (
-        ('Pending' , 'Panding') ,
-        ('Out of delivery' ,'Out of delivery') ,
+        ('Pending', 'Pending'),
+        ('Out of delivery', 'Out of delivery'),
         ('Delivered', 'Delivered'),
     )
     customer = models.ForeignKey(Customer, null=True, on_delete=models.SET_NULL)
