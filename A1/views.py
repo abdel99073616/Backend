@@ -11,13 +11,13 @@ from django.contrib.auth import authenticate , login , logout
 from django.contrib import messages
 from .filters import Orderfilter
 from django.contrib.auth.decorators import login_required
-from .decorators import unauthenticated_user , allowed_users
+from .decorators import unauthenticated_user , allowed_users , admin_only
 
 
 
 
 @login_required(login_url='login')
-@allowed_users(allowed_roles=['admin'])
+@admin_only
 def home(request):
     orders = Order.objects.all()
     customers = Customer.objects.all()
@@ -33,6 +33,8 @@ def home(request):
                }
     return render(request, 'accounts/dashboard.html', context)
 
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['admin'])
 def Customers(request, pk):
     customer = Customer.objects.get(id=pk)
     orders = customer.order_set.all()
@@ -42,11 +44,15 @@ def Customers(request, pk):
     context = {'customer':customer, 'orders': orders, 'order_count': order_count, 'myFilter':myFilter }
     return render(request,'accounts/customer.html', context)
 
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['admin'])
 def Prodects(request):
     products = Product.objects.all()
 
     return render(request,'accounts/products.html' , {'products': products})
 
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['admin'])
 def createOrder(request ,pk):
     OrderFormSet = inlineformset_factory(Customer , Order , fields=('product','status') , extra=2)
     customer = Customer.objects.get(id= pk)
@@ -61,6 +67,8 @@ def createOrder(request ,pk):
     context ={'formset' : formset}
     return render(request,'accounts/order_form.html',context)
 
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['admin'])
 def updateOrder(request,pk):
     order = Order.objects.get(id=pk)
     form = OrderForm(instance=order)
@@ -71,6 +79,9 @@ def updateOrder(request,pk):
             return redirect('/')
     context = {'form':form}
     return render(request, 'accounts/order_form.html',context)
+
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['admin'])
 def deleteOrder(request , pk):
     order = Order.objects.get(id=pk)
     if request.method == "POST":
@@ -109,5 +120,6 @@ def logoutpage(request):
     return redirect('login')
 
 def userpage(reqest):
-    context = {}
-    return redirect(reqest)
+    orders = Order.objects.all()
+    context = {'orders':orders}
+    return render(reqest, 'accounts/user.html' , context)

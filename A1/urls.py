@@ -12,6 +12,5 @@ urlpatterns = [
         path('create_order/<str:pk>', createOrder, name='create_order'),
         path('update_order/<str:pk>', updateOrder, name='update_order'),
         path('delete/<str:pk>', deleteOrder, name='delete_order'),
-
+        path('account/', deleteOrder, name='account')
 ]
-
