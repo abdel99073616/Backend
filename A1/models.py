@@ -13,11 +13,6 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.name
-def create_customer(sender,instance , created , **kwargs):
-    if created:
-        Customer.objects.create(user = instance)
-post_save.connect(create_customer , sender =User )
-
 
 class Tag(models.Model):
     name = models.CharField(max_length=200, null=True)

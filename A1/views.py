@@ -14,9 +14,6 @@ from .filters import Orderfilter
 from django.contrib.auth.decorators import login_required
 from .decorators import unauthenticated_user , allowed_users , admin_only
 
-
-
-
 @login_required(login_url='login')
 @admin_only
 def home(request):
